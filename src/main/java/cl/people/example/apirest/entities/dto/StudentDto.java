@@ -1,12 +1,17 @@
 package cl.people.example.apirest.entities.dto;
 
+import java.io.Serializable;
+
 import cl.people.example.apirest.entities.Course;
 
 /**
  * @author Alex Águila date 26-08-2020
  */
-public class StudentDto {
+public class StudentDto implements Serializable {
 
+    
+    private static final long serialVersionUID = 4996902761298628783L;
+    
     private String rut;
     private String name;
     private String lastName;

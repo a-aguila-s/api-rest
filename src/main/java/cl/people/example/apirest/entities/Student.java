@@ -1,5 +1,7 @@
 package cl.people.example.apirest.entities;
 
+import java.io.Serializable;
+
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 
@@ -9,7 +11,9 @@ import javax.validation.constraints.Min;
  */
 @Entity
 @Table(name = "student")
-public class Student {
+public class Student implements Serializable {
+
+    private static final long serialVersionUID = 7214439658586554850L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +29,7 @@ public class Student {
     @Min(19)
     private int age;
     @ManyToOne
-    @JoinColumn(name="idcourse")
+    @JoinColumn(name="courseId", referencedColumnName = "idcourse")
     private Course course;
 
     public Long getIdStudent() {
