@@ -1,10 +1,8 @@
 package cl.people.example.apirest.entities;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Table;
+import java.util.List;
+
+import javax.persistence.*;
 import javax.validation.constraints.Max;
 
 /**
@@ -17,17 +15,22 @@ public class Course {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "idcourse")
+    private Long idCourse;
+    @Column(name = "name")
     private String name;
+    @Column(name = "code")
     @Max(4)
     private String code;
+    @OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
+    private List<Student> studentsList;
 
-    public Long getId() {
-        return id;
+    public Long getIdCourse() {
+        return idCourse;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdCourse(Long idCourse) {
+        this.idCourse = idCourse;
     }
 
     public String getName() {
@@ -46,5 +49,14 @@ public class Course {
         this.code = code;
     }
 
+    public List<Student> getStudentsList() {
+        return studentsList;
+    }
+
+    public void setStudentsList(List<Student> studentsList) {
+        this.studentsList = studentsList;
+    }
+
+    
     
 }

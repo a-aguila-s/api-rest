@@ -1,40 +1,17 @@
-package cl.people.example.apirest.entities;
+package cl.people.example.apirest.entities.dto;
 
-import javax.persistence.*;
-import javax.validation.constraints.Min;
+import cl.people.example.apirest.entities.Course;
 
 /**
- * @author Alex Águila
- * date 23-08-2020
+ * @author Alex Águila date 26-08-2020
  */
-@Entity
-@Table(name = "student")
-public class Student {
+public class StudentDto {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idstudent")
-    private Long idStudent;
-    @Column(name = "rut")
     private String rut;
-    @Column(name = "name")
     private String name;
-    @Column(name = "lastName")
     private String lastName;
-    @Column(name = "age")
-    @Min(19)
     private int age;
-    @ManyToOne
-    @JoinColumn(name="idcourse")
     private Course course;
-
-    public Long getIdStudent() {
-        return idStudent;
-    }
-
-    public void setIdStudent(Long idStudent) {
-        this.idStudent = idStudent;
-    }
 
     public String getRut() {
         return rut;
@@ -75,5 +52,6 @@ public class Student {
     public void setCourse(Course course) {
         this.course = course;
     }
+
     
 }
