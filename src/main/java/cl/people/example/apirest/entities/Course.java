@@ -1,5 +1,6 @@
 package cl.people.example.apirest.entities;
 
+import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.*;
@@ -11,7 +12,9 @@ import javax.validation.constraints.Max;
  */
 @Entity
 @Table(name = "course")
-public class Course {
+public class Course implements Serializable {
+
+    private static final long serialVersionUID = -1385957604059841158L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
