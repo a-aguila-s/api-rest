@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
-import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
@@ -19,13 +18,8 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
  * @deprecated
  */
 @Configuration
-@EnableAuthorizationServer
 @Deprecated(forRemoval = false)
 public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
-
-    @Autowired
-    @Qualifier("authenticationManagerBean")
-    private AuthenticationManager authenticationManager;
 
     @Value("${security.oauth2.client_id}")
     private String client_id;
@@ -33,29 +27,30 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     @Value("${security.oauth2.secret}")
     private String cliente_secret;
 
-    @Value("${security.oauth2.grant_type_password}")
-    private String grany_type_password;
-
-    @Value("${security.oauth2.grant_type_client_credentials}")
-    private String grant_type_client_credencials;
-
     @Value("${security.oauth2.scope_read}")
     private String scope_read;
 
     @Value("${security.oauth2.scope_write}")
     private String scope_write;
 
-    @Value("${security.oauth2.signing_key}")
-    private String signing_key;
+    @Value("${security.oauth2.private.key}")
+    private String private_key;
+
+    @Value("${security.oauth2.public.key}")
+    private String public_key;
 
     @Value("${security.oauth2.access_token_valid_time}")
     private int acces_token_valid_time;
 
+    @Autowired
+    @Qualifier("authenticationManagerBean")
+    private AuthenticationManager authenticationManager;
+
     @Bean
     public JwtAccessTokenConverter tokenEnhancer() {
         JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey(signing_key);
-        converter.setVerifierKey(signing_key);
+        converter.setSigningKey(private_key);
+        converter.setVerifierKey(private_key);
         return converter;
     }
 
@@ -75,9 +70,9 @@ public class AuthServerConfig extends AuthorizationServerConfigurerAdapter {
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 .withClient(client_id)
-                .secret(cliente_secret)
+                .secret("{noop}"+cliente_secret)
                 .scopes(scope_read, scope_write)
-                .authorizedGrantTypes(grant_type_client_credencials, grany_type_password, "refresh_token")
+                .authorizedGrantTypes("client_credentials", "password", "refresh_token")
                 .accessTokenValiditySeconds(acces_token_valid_time)
                 .refreshTokenValiditySeconds(acces_token_valid_time);
     }
