@@ -1,6 +1,6 @@
 #23People API REST
 
-Spring-boot 2.3.3 + JPA (Hibernate) + H2 + OAuth2 with JWT
+Spring-boot 2.3.3 + JPA (Hibernate) + MySQL + OAuth2 with JWT
 
 #MySQL <br/>
 spring.datasource.platform=MYSQL <br/>
