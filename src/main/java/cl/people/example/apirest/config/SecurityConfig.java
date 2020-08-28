@@ -1,13 +1,15 @@
 package cl.people.example.apirest.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.annotation.web.servlet.configuration.EnableWebMvcSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 
 /**
@@ -15,7 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
  * @deprecated
  */
 @Configuration
-@EnableWebMvcSecurity
+@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Deprecated(forRemoval = false)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
@@ -41,9 +43,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
         auth.inMemoryAuthentication()
-                .withUser(user).password(user_pwd).roles(role_user)
+                .withUser(user).password("{noop}"+user_pwd).roles(role_user)
                 .and()
-                .withUser(admin).password(admin_pwd).roles(role_admin);
+                .withUser(admin).password("{noop}"+admin_pwd).roles(role_admin);
     }
 
     @Override
@@ -54,11 +56,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .headers().frameOptions().disable()
+            .authorizeRequests()
+            .anyRequest()
+            .authenticated()
             .and()
-            .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            .and().authorizeRequests().anyRequest().authenticated();
+            .sessionManagement()
+            .sessionCreationPolicy(SessionCreationPolicy.NEVER);
+    }
+
+    @Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 
     
