@@ -28,6 +28,10 @@ public class Course implements Serializable {
     @OneToMany(mappedBy = "course", fetch = FetchType.EAGER)
     private List<Student> studentsList;
 
+    public Course() {
+        //ALL public empty construct 
+    }
+
     public Long getIdCourse() {
         return idCourse;
     }

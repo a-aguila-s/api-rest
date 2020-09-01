@@ -14,5 +14,11 @@ public class ValidRutFunctionTest {
         boolean result = RutValidationFunction.validRut(18298730, '1');
         Assertions.assertTrue(result);
     }
+
+    @Test
+    void testInvalidRutFunction() {
+        boolean result = RutValidationFunction.validRut(18298730, '0');
+        Assertions.assertFalse(result);
+    }
     
 }

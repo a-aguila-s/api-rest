@@ -32,6 +32,10 @@ public class Student implements Serializable {
     @JoinColumn(name="courseId", referencedColumnName = "idcourse")
     private Course course;
 
+    public Student() {
+        //ALL public empty construct
+    }
+
     public Long getIdStudent() {
         return idStudent;
     }
