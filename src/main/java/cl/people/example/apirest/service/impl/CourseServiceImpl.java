@@ -27,7 +27,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course deleteCourse(Long courseId) {
-        Course course = courseRepository.getOne(courseId);
+        Course course = this.getCourseById(courseId);
         try {
             courseRepository.delete(course);
         } catch (IllegalArgumentException e) {
@@ -39,7 +39,7 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public Course getCourseById(Long courseId) {
-        return courseRepository.getOne(courseId);
+        return courseRepository.findById(courseId).orElse(null);
     }
 
     @Override
@@ -48,11 +48,8 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public Course updateCourse(Long courseId, Course courseUpdate) {
-        Course course = courseRepository.getOne(courseId);
-        course.setName(courseUpdate.getName());
-        course.setCode(courseUpdate.getCode());
-        return courseRepository.save(course);
+    public Course updateCourse(Course courseUpdate) {
+        return courseRepository.save(courseUpdate);
     }
 
     

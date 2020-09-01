@@ -12,10 +12,16 @@ import java.util.Map;
 import javax.persistence.EntityNotFoundException;
 import javax.validation.Valid;
 
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.StatusType;
+import javax.ws.rs.core.MediaType;
+
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -55,11 +61,19 @@ public class CourseController {
         @ApiResponse(code = 400, message = "Client Errors"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @GetMapping("/courses")
-    public ResponseEntity<List<Course>> getCoursesList(@RequestHeader Map<String, String> headers) {
-        List<Course> course = courseService.getCoursesList();
-        return course.isEmpty() ? ResponseEntity.noContent().build() :
-                ResponseEntity.ok(course);
+    public Response getCoursesList(@RequestHeader Map<String, String> headers) {
+        try {
+            List<Course> course = courseService.getCoursesList();
+
+            if(!course.isEmpty()) {
+                return Response.status(Response.Status.NO_CONTENT).entity(Course.class).build();
+            }
+            return Response.status(Response.Status.OK).entity(course).build();   
+        }catch(Exception e) {
+            return Response.status(Response.Status.NO_CONTENT).entity(Course.class).build();
+        }
     }
 
     //Course By Id
@@ -70,11 +84,18 @@ public class CourseController {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @GetMapping("/courses/{id}")
-    public ResponseEntity<Course> getCourseById(@RequestHeader Map<String, String> headers, @PathVariable("id") Long courseId) {
-        Course course = courseService.getCourseById(courseId);
-        return course == null ? ResponseEntity.notFound().build() :
-                ResponseEntity.ok(course);
+    public Response getCourseById(@RequestHeader Map<String, String> headers, @PathVariable("id") Long courseId) {
+        try {
+            Course course = courseService.getCourseById(courseId);
+            if(course == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+            }
+            return Response.status(Response.Status.OK).entity(course).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+        }
     }
 
     //Create Course
@@ -85,15 +106,23 @@ public class CourseController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @PostMapping("/courses")
-    public ResponseEntity<Course> createCourse(@RequestHeader Map<String, String> headers, 
+    public Response createCourse(@RequestHeader Map<String, String> headers, 
                                                     @RequestBody @Valid CourseDto courseDto) {                                                        
-        Course newCourse = new Course();
-        newCourse.setName(courseDto.getName());
-        newCourse.setCode(courseDto.getCode());
-        Course courseCreated = courseService.createCourse(newCourse);
-        return courseCreated == null ? ResponseEntity.badRequest().build() :
-                ResponseEntity.ok(courseCreated);
+        try {
+            Course newCourse = new Course();
+            newCourse.setName(courseDto.getName());
+            newCourse.setCode(courseDto.getCode());
+            Course courseCreated = courseService.createCourse(newCourse);
+
+            if(courseCreated == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(Course.class).build();
+            }
+            return Response.status(Response.Status.OK).entity(courseCreated).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+        }
     }
 
     //Update Course
@@ -105,17 +134,21 @@ public class CourseController {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @PutMapping("/courses/{id}")
-    public ResponseEntity<Course> updateCourse(@RequestHeader Map<String, String> headers, 
+    public Response updateCourse(@RequestHeader Map<String, String> headers, 
                                                     @PathVariable("id") Long courseId,
                                                     @RequestBody @Valid CourseDto courseDto) {                                                        
-        Course course = courseService.getCourseById(courseId);
-        if (course == null) return ResponseEntity.notFound().build();
-        course.setName(courseDto.getName());
-        course.setCode(courseDto.getCode());
-        Course courseUpdated = courseService.createCourse(course);
-        return courseUpdated == null ? ResponseEntity.badRequest().build() :
-                ResponseEntity.ok(courseUpdated);
+        try {
+            Course course = courseService.getCourseById(courseId);
+            if (course == null) return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+            course.setName(courseDto.getName());
+            course.setCode(courseDto.getCode());
+            Course courseUpdated = courseService.updateCourse(course);
+            return Response.status(Response.Status.OK).entity(courseUpdated).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(Course.class).build();
+        }
     }
 
     //Delete Course
@@ -126,24 +159,16 @@ public class CourseController {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @DeleteMapping("/courses/{id}")
-    public ResponseEntity<Course> deleteCourse(@RequestHeader Map<String, String> headers, 
+    public Response deleteCourse(@RequestHeader Map<String, String> headers, 
                                                     @PathVariable("id") Long courseId) {                                                        
-        Course course = courseService.deleteCourse(courseId);
-        return course == null ? ResponseEntity.notFound().build() :
-                ResponseEntity.ok(course);
-    }
-
-    @ResponseStatus(org.springframework.http.HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(value = { EmptyResultDataAccessException.class })
-    public void handleBadRequest() {
-        //TODO Error response with APiError
-    }
-
-    @ResponseStatus(org.springframework.http.HttpStatus.NOT_FOUND)
-    @ExceptionHandler(value = { EntityNotFoundException.class })
-    public void handleNotFound() {
-        //TODO Error response with APiError
+        try {
+            Course course = courseService.deleteCourse(courseId);
+            return Response.status(Response.Status.OK).entity(course).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+        }
     }
     
 }

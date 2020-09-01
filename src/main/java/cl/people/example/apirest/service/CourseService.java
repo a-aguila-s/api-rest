@@ -16,7 +16,7 @@ public interface CourseService {
 
     public Course createCourse(Course course);
 
-    public Course updateCourse(Long courseId, Course course);
+    public Course updateCourse(Course courseUpdate);
 
     public Course deleteCourse(Long courseId);
     
