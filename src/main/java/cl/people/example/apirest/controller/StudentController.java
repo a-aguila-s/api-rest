@@ -2,6 +2,7 @@ package cl.people.example.apirest.controller;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import cl.people.example.apirest.entities.Course;
 import cl.people.example.apirest.entities.Student;
 import cl.people.example.apirest.entities.dto.StudentDto;
 import cl.people.example.apirest.service.StudentService;
@@ -10,11 +11,14 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,11 +55,19 @@ public class StudentController {
         @ApiResponse(code = 400, message = "Client Errors"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @GetMapping("/students")
-    public ResponseEntity<List<Student>> getCoursesList(@RequestHeader Map<String, String> headers) {
-        List<Student> student = studentService.getStudentsList();
-        return student.isEmpty() ? ResponseEntity.noContent().build() :
-                ResponseEntity.ok(student);
+    public Response getCoursesList(@RequestHeader Map<String, String> headers) {
+        try {
+            List<Student> studentList = studentService.getStudentsList();
+
+            if(studentList.isEmpty()) {
+                return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();    
+            }
+            return Response.status(Response.Status.OK).entity(studentList).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+        }
     }
 
     //Course By Id
@@ -66,11 +78,19 @@ public class StudentController {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @GetMapping("/students/{id}")
-    public ResponseEntity<Student> getCourseById(@RequestHeader Map<String, String> headers, @PathVariable("id") Long studentId) {
-        Student student = studentService.getStudentById(studentId);
-        return student == null ? ResponseEntity.notFound().build() :
-                ResponseEntity.ok(student);
+    public Response getCourseById(@RequestHeader Map<String, String> headers, @PathVariable("id") Long studentId) {
+        try {
+            Student student = studentService.getStudentById(studentId);
+
+            if(student == null) {
+                return Response.status(Response.Status.NOT_FOUND).entity(Student.class).build();
+            }
+            return Response.status(Response.Status.OK).entity(student).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Student.class).build();
+        }
     }
 
     //Create Course
@@ -81,18 +101,27 @@ public class StudentController {
         @ApiResponse(code = 400, message = "Bad Request"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @PostMapping("/students")
-    public ResponseEntity<Student> createCourse(@RequestHeader Map<String, String> headers, 
+    public Response createCourse(@RequestHeader Map<String, String> headers, 
                                                     @RequestBody @Valid StudentDto studentDto) {                                                        
-        Student newStudent = new Student();
-        newStudent.setRut(studentDto.getRut());
-        newStudent.setName(studentDto.getName());
-        newStudent.setLastName(studentDto.getLastName());
-        newStudent.setAge(studentDto.getAge());
-        newStudent.setCourse(studentDto.getCourse());
-        Student studentCreated = studentService.createStudent(newStudent);
-        return studentCreated == null ? ResponseEntity.badRequest().build() :
-                ResponseEntity.ok(studentCreated);
+        try {
+            if(studentDto.getAge() <= 18) throw new BadRequestException("Age must be upper than 18") ;
+            Student newStudent = new Student();
+            newStudent.setRut(studentDto.getRut());
+            newStudent.setName(studentDto.getName());
+            newStudent.setLastName(studentDto.getLastName());
+            newStudent.setAge(studentDto.getAge());
+            newStudent.setCourse(studentDto.getCourse());
+            Student studentCreated = studentService.createStudent(newStudent);
+
+            if(studentCreated == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(Student.class).build();
+            }
+            return Response.status(Response.Status.OK).entity(studentCreated).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(Student.class).build();
+        }
     }
 
     //Update Course
@@ -104,20 +133,29 @@ public class StudentController {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @PutMapping("/students/{id}")
-    public ResponseEntity<Student> updateCourse(@RequestHeader Map<String, String> headers, 
+    public Response updateCourse(@RequestHeader Map<String, String> headers, 
                                                     @PathVariable("id") Long studentId,
                                                     @RequestBody @Valid StudentDto studentDto) {                                                        
-        Student student = studentService.getStudentById(studentId);
-        if (student == null) return ResponseEntity.notFound().build();
-        student.setRut(studentDto.getRut());
-        student.setName(studentDto.getName());
-        student.setLastName(studentDto.getLastName());
-        student.setAge(studentDto.getAge());
-        student.setCourse(studentDto.getCourse());
-        Student studentUpdated = studentService.createStudent(student);
-        return studentUpdated == null ? ResponseEntity.badRequest().build() :
-                ResponseEntity.ok(studentUpdated);
+        try {
+            if(studentDto.getAge() <= 18) throw new BadRequestException("Age must be upper than 18") ;
+            Student student = studentService.getStudentById(studentId);
+            if (student == null) return Response.status(Response.Status.NOT_FOUND).entity(Student.class).build();
+            student.setRut(studentDto.getRut());
+            student.setName(studentDto.getName());
+            student.setLastName(studentDto.getLastName());
+            student.setAge(studentDto.getAge());
+            student.setCourse(studentDto.getCourse());
+            Student studentUpdated = studentService.updateStudent(student);
+
+            if(studentUpdated == null) {
+                return Response.status(Response.Status.BAD_REQUEST).entity(Student.class).build();
+            }
+            return Response.status(Response.Status.OK).entity(studentUpdated).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.BAD_REQUEST).entity(Student.class).build();
+        }
     }
 
     //Delete Course
@@ -128,12 +166,16 @@ public class StudentController {
         @ApiResponse(code = 404, message = "Not Found"),
         @ApiResponse(code = 500, message = "Server Errors")
     })
+    @Produces(MediaType.APPLICATION_JSON)
     @DeleteMapping("/students/{id}")
-    public ResponseEntity<Student> deleteCourse(@RequestHeader Map<String, String> headers, 
+    public Response deleteCourse(@RequestHeader Map<String, String> headers, 
                                                     @PathVariable("id") Long studentId) {                                                        
-        Student student = studentService.deleteStudent(studentId);
-        return student == null ? ResponseEntity.notFound().build() :
-                ResponseEntity.ok(student);
+        try {
+            Student student = studentService.deleteStudent(studentId);
+            return Response.status(Response.Status.OK).entity(student).build();
+        } catch(Exception e) {
+            return Response.status(Response.Status.NOT_FOUND).entity(Student.class).build();
+        }
     }
     
 }

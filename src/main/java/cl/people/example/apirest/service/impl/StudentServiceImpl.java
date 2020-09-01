@@ -27,7 +27,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student deleteStudent(Long studentId) {
-        Student student = studentRepository.getOne(studentId);
+        Student student = this.getStudentById(studentId);
         try {
             studentRepository.delete(student);
         } catch (IllegalArgumentException e) {
@@ -39,7 +39,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     public Student getStudentById(Long studentId) {
-        return studentRepository.getOne(studentId);
+        return studentRepository.findById(studentId).orElse(null);
     }
 
     @Override
@@ -48,14 +48,8 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public Student updateStudent(Long studentId, Student studentUpdate) {
-        Student student = studentRepository.getOne(studentId);
-        student.setName(studentUpdate.getRut());
-        student.setName(studentUpdate.getName());
-        student.setLastName(studentUpdate.getLastName());
-        student.setAge(studentUpdate.getAge());
-        student.setCourse(studentUpdate.getCourse());
-        return studentRepository.save(student);
+    public Student updateStudent(Student studentUpdate) {
+        return studentRepository.save(studentUpdate);
     }
     
 }

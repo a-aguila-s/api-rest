@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
-
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.MediaType;
@@ -58,12 +58,12 @@ public class CourseController {
     @GetMapping("/courses")
     public Response getCoursesList(@RequestHeader Map<String, String> headers) {
         try {
-            List<Course> course = courseService.getCoursesList();
+            List<Course> courseList = courseService.getCoursesList();
 
-            if(!course.isEmpty()) {
+            if(courseList.isEmpty()) {
                 return Response.status(Response.Status.NO_CONTENT).entity(Course.class).build();
             }
-            return Response.status(Response.Status.OK).entity(course).build();   
+            return Response.status(Response.Status.OK).entity(courseList).build();   
         }catch(Exception e) {
             return Response.status(Response.Status.NO_CONTENT).entity(Course.class).build();
         }
@@ -104,6 +104,7 @@ public class CourseController {
     public Response createCourse(@RequestHeader Map<String, String> headers, 
                                                     @RequestBody @Valid CourseDto courseDto) {                                                        
         try {
+            if(courseDto.getCode().length() > 4) throw new BadRequestException("Code value must be 4 characters lenght");
             Course newCourse = new Course();
             newCourse.setName(courseDto.getName());
             newCourse.setCode(courseDto.getCode());
@@ -114,7 +115,7 @@ public class CourseController {
             }
             return Response.status(Response.Status.OK).entity(courseCreated).build();
         } catch(Exception e) {
-            return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(Course.class).build();
         }
     }
 
@@ -133,6 +134,7 @@ public class CourseController {
                                                     @PathVariable("id") Long courseId,
                                                     @RequestBody @Valid CourseDto courseDto) {                                                        
         try {
+            if(courseDto.getCode().length() > 4) throw new BadRequestException("Code value must be 4 characters lenght");
             Course course = courseService.getCourseById(courseId);
             if (course == null) return Response.status(Response.Status.NOT_FOUND).entity(Course.class).build();
             course.setName(courseDto.getName());

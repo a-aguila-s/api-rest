@@ -16,7 +16,7 @@ public interface StudentService {
 
     public Student createStudent(Student student);
 
-    public Student updateStudent(Long studentId, Student student);
+    public Student updateStudent(Student studentUpdate);
 
     public Student deleteStudent(Long studentId);
     
